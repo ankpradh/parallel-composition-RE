@@ -1,7 +1,7 @@
 import time
 import random
 from pympler import asizeof
-from enforcer import *
+from enforcers import *
 from maxMerge import *
 
 SIZEOF = False
