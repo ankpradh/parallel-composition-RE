@@ -1,5 +1,5 @@
 from automata import state
-from enforcer import pDFA
+from enforcers import pDFA
 
 def maxMerge(_input, *D):
     """ Function to maximally merge the contents of external buffers of a set of 2 or more parallel enforcers.
