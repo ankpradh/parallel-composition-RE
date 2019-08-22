@@ -230,8 +230,9 @@ def test1(Input):
     # Parallel Composition Test
     tsC = time.time()
     A, B = EM1("pDFA"), EM2("pDFA")
+    A_B = parallel_enforcer(A, B)
     tsC = time.time()
-    accept = maxMerge(Input, A, B)
+    accept = A_B.checkAccept(Input)
     teC = time.time()
     
     return (teP - tsP)*1000, (teC - tsC)*1000
@@ -254,8 +255,9 @@ def test2(Input):
     # Parallel Composition Test
     tsC = time.time()
     A, B, C = EM1("pDFA"), EM2("pDFA"), EM3("pDFA")
+    A_B_C = parallel_enforcer(A, B, C)
     tsC = time.time()
-    accept = maxMerge(Input, A, B, C)
+    accept = A_B_C.checkAccept(Input)
     teC = time.time()
 
     return (teP - tsP)*1000, (teC - tsC)*1000
@@ -278,8 +280,9 @@ def test3(Input):
     # Parallel Composition Test
     tsC = time.time()
     R1, R2, R3, R4, R5, R6 = EM4("pDFA"), EM5("pDFA"), EM6("pDFA"), EM7("pDFA"), EM8("pDFA"), EM9("pDFA")
+    R = parallel_enforcer(R1, R2, R3, R4, R5, R6)
     tsC = time.time()
-    accept = maxMerge(Input, R1, R2, R3, R4, R5, R6)
+    accept = R.checkAccept(Input)
     teC = time.time()
 
     return (teP - tsP)*1000, (teC - tsC)*1000
