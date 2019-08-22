@@ -58,7 +58,89 @@ class pDFA(DFA):
         """ Returns the contents of the external buffer. """
         return self.out_buffer
 
+    
+class parallel_enforcer(object):
+    """ Class for maximally merging the contents of external buffers of a set of 2 or more parallel enforcers.
+    Args
+    ----
+    _input : String of input characters belonging to the alphabet.
+    
+    Testable Code
+    -------------
+    >>> t = str(bin(15*1859))[2:]
+    >>> print(len(t), int(t, 2))
+    15 27885
+    >>> A1, A2, A3 = state('A1'), state('A2'), state('A3')
+    >>> B1, B2, B3, B4, B5 = state('B1'), state('B2'), state('B3'), state('B4'), state('B5')
+    >>> A1.transit['0'] = A1
+    >>> A1.transit['1'] = A2
+    >>> A2.transit['0'] = A3
+    >>> A2.transit['1'] = A1
+    >>> A3.transit['0'] = A2
+    >>> A3.transit['1'] = A3
+    >>> B1.transit['0'] = B1
+    >>> B1.transit['1'] = B2
+    >>> B2.transit['0'] = B3
+    >>> B2.transit['1'] = B4
+    >>> B3.transit['0'] = B5
+    >>> B3.transit['1'] = B1
+    >>> B4.transit['0'] = B2
+    >>> B4.transit['1'] = B3
+    >>> B5.transit['0'] = B4
+    >>> B5.transit['1'] = B5
+    >>> A = pDFA('A', ['0', '1'], [A1, A2, A3], A1, [A1])
+    >>> B = pDFA('B', ['0', '1'], [B1, B2, B3, B4, B5], B1, [B1])
+    >>> M = parallel_enforcer(A, B)
+    >>> M.checkAccept(t)
+    ['110110011', '101101']
+    """
+    def __init__(self, *D):
+        """
+        Initializes enforcers and buffers for input verification of the parallel composition.
 
+        Args
+        ----
+        *D     : set of parallel enforcer automaton (should be atleast 2 lest AssertionError).
+        """
+        assert len(D) > 1, "Too few DFA to combine"
+        self.output = []
+        self.D = D
+        self.out_buffer_len = [automata.lenOut() for automata in D]
+
+    def updateStatusOnInput(self, _input):
+        """ 
+        Returns a signal array where each entry suggests whether the corresponding enforcer 
+        has updated its external buffer upon reading the current input character. 
+        """
+        signal = [0 for automata in self.D]
+        for idx, automata in enumerate(self.D):
+            automata.runInput(_input)
+            curr_size = automata.lenOut()
+            if curr_size != self.out_buffer_len[idx] and curr_size != 0:
+                self.out_buffer_len[idx] = curr_size
+                signal[idx] = 1
+        return signal
+
+    def maxMerge(self, signal):
+        """ 
+        Checks whether all enforcers have updated their external buffers upon reading the  
+        current input character. If so, the output of the composition is updated and the 
+        external buffers of all the enforcers are flushed. 
+        """
+        if all(signal) == True:
+            enforced = self.D[0].outBuffer()
+            for automata in self.D:
+                automata.flushOutBuffer()
+            self.output.append(''.join(enforced))
+
+    def checkAccept(self, Input):
+        """ Returns streams of outputs accepted by the parallel composition. """
+        for i in Input:
+            signal = self.updateStatusOnInput(i)
+            self.maxMerge(signal)
+        return self.output
+
+    
 def product(A, B, p_name):
     """ Computes the product automaton of two DFAs.
 
@@ -146,6 +228,7 @@ def product(A, B, p_name):
     # return Product Automaton
     return DFA(p_name, A.alphabet, p_states, p_start, p_end)
 
+
 def monolithic_enforcer(name, *D):
     """ Function for generating monolithic enforcers.
         
@@ -206,6 +289,7 @@ def monolithic_enforcer(name, *D):
             combined_enforcer = product(combined_enforcer, D[i], name)
         return combined_enforcer
     return combine_properties(name, *D)
+
 
 if __name__ == '__main__':
     debug = True
