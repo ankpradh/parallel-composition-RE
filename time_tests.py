@@ -11,6 +11,9 @@ EM_size = dict()
 # Enforcers
 
 def EM1(Type="DFA"):
+    """
+    Accepting binary strings divisible by 3
+    """
     A1, A2, A3 = state('A1'), state('A2'), state('A3')
     A1.transit['0'] = A1
     A1.transit['1'] = A2
@@ -27,6 +30,9 @@ def EM1(Type="DFA"):
     return A
 
 def EM2(Type="DFA"):
+    """
+    Accepting binary strings divisible by 5
+    """
     B1, B2, B3, B4, B5 = state('B1'), state('B2'), state('B3'), state('B4'), state('B5')
     B1.transit['0'] = B1
     B1.transit['1'] = B2
@@ -47,6 +53,9 @@ def EM2(Type="DFA"):
     return B
 
 def EM3(Type="DFA"):
+    """
+    Accepting binary strings divisible by 7
+    """
     C1, C2, C3, C4, C5, C6, C7 = state('C1'), state('C2'), state('C3'), state('C4'), state('C5'), state('C6'), state('C7')
     C1.transit['0'] = C1
     C1.transit['1'] = C2
@@ -70,7 +79,13 @@ def EM3(Type="DFA"):
         EM_size["EM3"] = asizeof.asizeof(C)
     return C    
 
+
+# Alphabet for EM4, EM5, EM6, EM7, EM8 and EM9 = {1, 2, 3, 4, 5, 6}
+
 def EM4(Type="DFA"):
+    """
+    Accepting strings with atleast one '1'
+    """
     R11, R12 = state('R11'), state('R12')
     for i in range(1, 7):
         R11.transit[str(i)] = R11
@@ -85,6 +100,9 @@ def EM4(Type="DFA"):
     return R1
 
 def EM5(Type="DFA"):
+    """
+    Accepting strings with '2' repeated in multiples of 2
+    """
     R21, R22, R23 = state('R21'), state('R22'), state('R23')
     for i in range(1, 7):
         R21.transit[str(i)] = R21
@@ -102,6 +120,9 @@ def EM5(Type="DFA"):
     return R2
 
 def EM6(Type="DFA"):
+    """
+    Accepting strings with '3' repeated in multiples of 3
+    """
     R31, R32, R33, R34 = state('R31'), state('R32'), state('R33'), state('R34')
     for i in range(1, 7):
         R31.transit[str(i)] = R31
@@ -121,6 +142,9 @@ def EM6(Type="DFA"):
     return R3
 
 def EM7(Type="DFA"):
+    """
+    Accepting strings with '4' repeated in multiples of 4
+    """
     R41, R42, R43, R44, R45 = state('R41'), state('R42'), state('R43'), state('R44'), state('R45')
     for i in range(1, 7):
         R41.transit[str(i)] = R41
@@ -142,6 +166,9 @@ def EM7(Type="DFA"):
     return R4
 
 def EM8(Type="DFA"):
+    """
+    Accepting strings with '5' repeated in multiples of 5
+    """
     R51, R52, R53, R54, R55, R56 = state('R51'), state('R52'), state('R53'), state('R54'), state('R55'), state('R56')
     for i in range(1, 7):
         R51.transit[str(i)] = R51
@@ -165,6 +192,9 @@ def EM8(Type="DFA"):
     return R5
 
 def EM9(Type="DFA"):
+    """
+    Accepting strings with '6' repeated in multiples of 6
+    """
     R61, R62, R63, R64, R65, R66, R67 = state('R61'), state('R62'), state('R63'), state('R64'), state('R65'), state('R66'), state('R67')
     for i in range(1, 7):
         R61.transit[str(i)] = R61
@@ -200,7 +230,7 @@ def avg_tests(runs, test, string, test_num):
         _time = test(string)
         test_Ptime += _time[0]
         test_Ctime += _time[1]
-    print("Test %s\n------" %(test_num))
+    print("Test %s (%s)\n------------------- " %(test_num, len(string)))
     print("Computation time for Monolithic Enforcer : %f ms" %(test_Ptime/test_avg_runs))
     print("Computation time for Compositional Enforcer : %f ms\n" %(test_Ctime/test_avg_runs))
 
@@ -216,7 +246,9 @@ def generate_strings(alphabet):
     return strings
 
 
-# Tests for compositions of EM1 and EM2 with 3*5 = 15 states
+# Tests for compositions of EM1 and EM2 
+# Monolithic Composition with 3*5 = 15 states
+# Parallel Composition with 3+5 = 8 states
 
 def test1(Input):
     # Monolithic Test
@@ -238,7 +270,9 @@ def test1(Input):
     return (teP - tsP)*1000, (teC - tsC)*1000
 
 
-# Tests for compositions of EM1, EM2 and EM3 with 3*5*7 = 105 states
+# Tests for compositions of EM1, EM2 and EM3 
+# Monolithic Composition with 3*5*7 = 105 states
+# Parallel Composition with 3+5+7 = 15 states
 
 def test2(Input):
     # Monolithic Test
@@ -263,7 +297,9 @@ def test2(Input):
     return (teP - tsP)*1000, (teC - tsC)*1000
 
 
-# Tests for compositions of EM4, EM5, EM6, EM7, EM8 and EM9 with 2*3*4*5*6 = 720 states
+# Tests for compositions of EM4, EM5, EM6, EM7, EM8 and EM9
+# Monolithic Composition with with 2*3*4*5*6*7 = 5040 states
+# Parallel Composition with 2+3+4+5+6+7 = 27 states
 
 def test3(Input):
     # Monolithic Test
