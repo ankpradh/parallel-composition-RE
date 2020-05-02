@@ -298,7 +298,7 @@ def test2(Input):
 
 
 # Tests for compositions of EM4, EM5, EM6, EM7, EM8 and EM9
-# Monolithic Composition with with 2*3*4*5*6*7 = 5040 states
+# Monolithic Composition with 2*3*4*5*6*7 = 5040 states
 # Parallel Composition with 2+3+4+5+6+7 = 27 states
 
 def test3(Input):
