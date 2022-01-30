@@ -174,16 +174,16 @@ def test4(Input):
 if __name__ == '__main__':
     Input1 = str(bin(15*1859))[2:]
     Input2 = "33322555556666661111444422"
-    # avg_tests(1000, test1, Input1, 1)
-    # avg_tests(1000, test2, Input1, 2)
-    # avg_tests(1000, test3, Input2, 3)
+    avg_tests(1000, test1, Input1, 1)
+    avg_tests(1000, test2, Input1, 2)
+    avg_tests(1000, test3, Input2, 3)
     strings1 = generate_strings('01')
     strings2 = generate_strings('123456')
     strings3 = generate_strings('abc')
-    # for string in strings1:
-    #     avg_tests(1000, test2, string, 2)
-    # for string in strings2:
-    #     avg_tests(1000, test3, string, 3)
+    for string in strings1:
+        avg_tests(1000, test2, string, 2)
+    for string in strings2:
+        avg_tests(1000, test3, string, 3)
     for string in strings3:
         avg_tests(100, test4, string, 4)
     if (SIZEOF):
