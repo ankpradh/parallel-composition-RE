@@ -1,7 +1,10 @@
+import sys
+sys.path.append("..")
+
 import time
 import random
 from pympler import asizeof
-from enforcers import *
+from src.enforcers import *
 
 SIZEOF = False
 EM_size = dict()

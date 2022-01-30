@@ -1,14 +1,14 @@
-import time
-import random
+import sys
+sys.path.append("..")
+
 from pympler import asizeof
-from enforcers import *
-from maxMerge import *
+from src.enforcers import *
 
 SIZEOF = False
 EM_size = dict()
 
-
 # Enforcers
+# Alphabet for EM1, EM2 and EM3 = {0, 1}
 
 def EM1(Type="DFA"):
     """
@@ -219,121 +219,73 @@ def EM9(Type="DFA"):
         EM_size["EM9"] = asizeof.asizeof(R6)
     return R6
 
+# Alphabet for EM10, EM11, EM12 = {a, b, c}
 
-# For computing average runtimes 
-
-def avg_tests(runs, test, string, test_num):
-    test_avg_runs = runs
-    test_Ptime = 0
-    test_Ctime = 0
-    for _ in range(test_avg_runs):
-        _time = test(string)
-        test_Ptime += _time[0]
-        test_Ctime += _time[1]
-    print("Test %s (%s)\n------------------- " %(test_num, len(string)))
-    print("Computation time for Monolithic Enforcer : %f ms" %(test_Ptime/test_avg_runs))
-    print("Computation time for Compositional Enforcer : %f ms\n" %(test_Ctime/test_avg_runs))
-
-
-# Generating random strings from given alphabet
-
-def generate_strings(alphabet):
-    strings = []
-    ranges = [(10**i, 5*10**i) for i in range(1, 6)]
-    for size1, size2 in ranges:
-        strings.append("".join(random.choices(alphabet, k=size1)))
-        strings.append("".join(random.choices(alphabet, k=size2)))
-    return strings
-
-
-# Tests for compositions of EM1 and EM2 
-# Monolithic Composition with 3*5 = 15 states
-# Parallel Composition with 3+5 = 8 states
-
-def test1(Input):
-    # Monolithic Test
-    tsP = time.time()
-    A, B = EM1(), EM2()
-    A_B = monolithic_enforcer('A_B', A, B)
-    tsP = time.time()
-    accept = A_B.checkAccept(Input)
-    teP = time.time()
-    
-    # Parallel Composition Test
-    tsC = time.time()
-    A, B = EM1("pDFA"), EM2("pDFA")
-    A_B = parallel_enforcer(A, B)
-    tsC = time.time()
-    accept = A_B.checkAccept(Input)
-    teC = time.time()
-    
-    return (teP - tsP)*1000, (teC - tsC)*1000
-
-
-# Tests for compositions of EM1, EM2 and EM3 
-# Monolithic Composition with 3*5*7 = 105 states
-# Parallel Composition with 3+5+7 = 15 states
-
-def test2(Input):
-    # Monolithic Test
-    tsP = time.time()
-    A, B, C = EM1(), EM2(), EM3()
-    A_B_C = monolithic_enforcer('A_B_C', A, B, C)
-    tsP = time.time()
-    accept = A_B_C.checkAccept(Input)
-    teP = time.time()
-
+def EM10(Type="DFA"):
+    """
+    After 'b' occurs, it is forbidden to have 'a'
+    """
+    RS1, RS2, RS3 = state('RS1'), state('RS2'), state('RS3')
+    RS1.transit['a'] = RS1
+    RS1.transit['b'] = RS2
+    RS1.transit['c'] = RS1
+    RS2.transit['a'] = RS3
+    RS2.transit['b'] = RS2
+    RS2.transit['c'] = RS2
+    RS3.transit['a'] = RS3
+    RS3.transit['b'] = RS3
+    RS3.transit['c'] = RS3
+    if Type == "pDFA":
+        RS = pDFA('RS', list('abc'), [RS1, RS2, RS3], RS1, [RS1, RS2])
+    else:
+        RS = DFA('RS', list('abc'), [RS1, RS2, RS3], RS1, [RS1, RS2])
     if (SIZEOF):
-        print(asizeof.asized(A_B_C, detail=1).format())
+        EM_size["EM10"] = asizeof.asizeof(RS)
+    return RS
 
-    # Parallel Composition Test
-    tsC = time.time()
-    A, B, C = EM1("pDFA"), EM2("pDFA"), EM3("pDFA")
-    A_B_C = parallel_enforcer(A, B, C)
-    tsC = time.time()
-    accept = A_B_C.checkAccept(Input)
-    teC = time.time()
-
-    return (teP - tsP)*1000, (teC - tsC)*1000
-
-
-# Tests for compositions of EM4, EM5, EM6, EM7, EM8 and EM9
-# Monolithic Composition with 2*3*4*5*6*7 = 5040 states
-# Parallel Composition with 2+3+4+5+6+7 = 27 states
-
-def test3(Input):
-    # Monolithic Test
-    tsP = time.time()
-    R1, R2, R3, R4, R5, R6 = EM4(), EM5(), EM6(), EM7(), EM8(), EM9()
-    R = monolithic_enforcer('R', R1, R2, R3, R4, R5, R6)
-    tsP = time.time()
-    accept = R.checkAccept(Input)
-    teP = time.time()
-
+def EM11(Type="DFA"):
+    """
+    At most two 'a' actions occur
+    """
+    RT1, RT2, RT3, RT4 = state('RT1'), state('RT2'), state('RT3'), state('RT4')
+    RT1.transit['a'] = RT2
+    RT1.transit['b'] = RT1
+    RT1.transit['c'] = RT1
+    RT2.transit['a'] = RT3
+    RT2.transit['b'] = RT2
+    RT2.transit['c'] = RT2
+    RT3.transit['a'] = RT4
+    RT3.transit['b'] = RT3
+    RT3.transit['c'] = RT3
+    RT4.transit['a'] = RT4
+    RT4.transit['b'] = RT4
+    RT4.transit['c'] = RT4
+    if Type == "pDFA":
+        RT = pDFA('RT', list('abc'), [RT1, RT2, RT3, RT4], RT1, [RT1, RT2, RT3])
+    else:
+        RT = DFA('RT', list('abc'), [RT1, RT2, RT3, RT4], RT1, [RT1, RT2, RT3])
     if (SIZEOF):
-        print(asizeof.asized(R, detail=1).format())
+        EM_size["EM11"] = asizeof.asizeof(RT)
+    return RT
 
-    # Parallel Composition Test
-    tsC = time.time()
-    R1, R2, R3, R4, R5, R6 = EM4("pDFA"), EM5("pDFA"), EM6("pDFA"), EM7("pDFA"), EM8("pDFA"), EM9("pDFA")
-    R = parallel_enforcer(R1, R2, R3, R4, R5, R6)
-    tsC = time.time()
-    accept = R.checkAccept(Input)
-    teC = time.time()
-
-    return (teP - tsP)*1000, (teC - tsC)*1000
-
-if __name__ == '__main__':
-    Input1 = str(bin(15*1859))[2:]
-    Input2 = "33322555556666661111444422"
-    avg_tests(1000, test1, Input1, 1)
-    avg_tests(1000, test2, Input1, 2)
-    avg_tests(1000, test3, Input2, 3)
-    strings1 = generate_strings('01')
-    strings2 = generate_strings('123456')
-    for string in strings1:
-        avg_tests(1000, test2, string, 2)
-    for string in strings2:
-        avg_tests(1000, test3, string, 3)
+def EM12(Type="DFA"):
+    """
+    There are no two consecutive 'a' actions
+    """
+    RU1, RU2, RU3 = state('RU1'), state('RU2'), state('RU3')
+    RU1.transit['a'] = RU2
+    RU1.transit['b'] = RU1
+    RU1.transit['c'] = RU1
+    RU2.transit['a'] = RU3
+    RU2.transit['b'] = RU1
+    RU2.transit['c'] = RU1
+    RU3.transit['a'] = RU3
+    RU3.transit['b'] = RU3
+    RU3.transit['c'] = RU3
+    if Type == "pDFA":
+        RU = pDFA('RU', list('abc'), [RU1, RU2, RU3], RU1, [RU1, RU2])
+    else:
+        RU = DFA('RU', list('abc'), [RU1, RU2, RU3], RU1, [RU1, RU2])
     if (SIZEOF):
-        print(EM_size)
+        EM_size["EM12"] = asizeof.asizeof(RU)
+    return RU
