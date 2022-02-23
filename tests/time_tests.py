@@ -12,7 +12,7 @@ def avg_tests(runs, test, string, test_num):
     test_avg_runs = runs
     test_Ptime = 0
     test_Ctime = 0
-    if test.__name__ == "test4":
+    if test.__name__ in ["test4", "test5"]:
         test_Stime = 0
         test_Mtime = 0
         for _ in range(test_avg_runs):
@@ -124,6 +124,11 @@ def test3(Input):
 
     return (teP - tsP)*1000, (teC - tsC)*1000
 
+
+# Tests for compositions of EM10, EM11, EM12 (Safety properties)
+# Monolithic Composition with 3*4*3 = 36 states
+# Serial and (both) Parallel Composition with 3+4+3 = 10 states
+
 def test4(Input):
     # Monolithic Test
     tsP = time.time()
@@ -171,12 +176,67 @@ def test4(Input):
 
     return (teP - tsP)*1000, (teS - tsS)*1000, (teM - tsM)*1000, (teC - tsC)*1000
 
+
+# Tests for compositions of EM13, EM14, EM15 (Co-safety properties)
+# Monolithic Composition with 4*5*3 = 60 states
+# Serial and (both) Parallel Composition with 4+5+3 = 12 states
+
+def test5(Input):
+    # Monolithic Test
+    tsP = time.time()
+    RCS, RCT, RCU = EM13(), EM14(), EM15()
+    RC = monolithic_enforcer('RC', RCS, RCT, RCU)
+    tsP = time.time()
+    accept = RC.checkAccept(Input)
+    teP = time.time()
+
+    if (SIZEOF):
+        print(asizeof.asized(RC, detail=1).format())
+
+    # Serial Composition Test
+    tsS = time.time()
+    RCS, RCT, RCU = EM13("DFA"), EM14("DFA"), EM15("DFA")
+    RC = serial_composition_enforcer(RCS, RCT, RCU)
+    tsS = time.time()
+    accept = RC.checkAccept(Input)
+    teS = time.time()
+
+    if (SIZEOF):
+        print(asizeof.asized(RC, detail=1).format())
+
+    # Maximal Prefix Parallel Composition Test
+    tsM = time.time()
+    RCS, RCT, RCU = EM13("pDFA"), EM14("pDFA"), EM15("pDFA")
+    RC = maximal_prefix_parallel_enforcer(RCS, RCT, RCU)
+    tsM = time.time()
+    accept = RC.checkAccept(Input)
+    teM = time.time()
+
+    if (SIZEOF):
+        print(asizeof.asized(RC, detail=1).format())
+
+    # Parallel Composition Test
+    tsC = time.time()
+    RCS, RCT, RCU = EM13("pDFA"), EM14("pDFA"), EM15("pDFA")
+    RC = parallel_enforcer(RCS, RCT, RCU)
+    tsC = time.time()
+    accept = RC.checkAccept(Input)
+    teC = time.time()
+
+    if (SIZEOF):
+        print(asizeof.asized(RC, detail=1).format())
+
+    return (teP - tsP)*1000, (teS - tsS)*1000, (teM - tsM)*1000, (teC - tsC)*1000
+
 if __name__ == '__main__':
     Input1 = str(bin(15*1859))[2:]
     Input2 = "33322555556666661111444422"
+    Input3 = "bbbbbbbbbbbbbbabbbbbbbbbbbbbb"
     avg_tests(1000, test1, Input1, 1)
     avg_tests(1000, test2, Input1, 2)
     avg_tests(1000, test3, Input2, 3)
+    avg_tests(1000, test4, Input3, 4)
+    avg_tests(1000, test5, Input3, 5)
     strings1 = generate_strings('01')
     strings2 = generate_strings('123456')
     strings3 = generate_strings('abc')
@@ -186,5 +246,6 @@ if __name__ == '__main__':
         avg_tests(1000, test3, string, 3)
     for string in strings3:
         avg_tests(100, test4, string, 4)
+        avg_tests(100, test5, string, 5)
     if (SIZEOF):
         print(EM_size)

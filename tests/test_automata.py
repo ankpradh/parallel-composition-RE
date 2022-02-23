@@ -289,3 +289,78 @@ def EM12(Type="DFA"):
     if (SIZEOF):
         EM_size["EM12"] = asizeof.asizeof(RU)
     return RU
+
+def EM13(Type="DFA"):
+    """
+    The first two actions should be 'a' followed by 'b'
+    """
+    RCS1, RCS2, RCS3, RCS4 = state('RCS1'), state('RCS2'), state('RCS3'), state('RCS4')
+    RCS1.transit['a'] = RCS2
+    RCS1.transit['b'] = RCS4
+    RCS1.transit['c'] = RCS4
+    RCS2.transit['a'] = RCS4
+    RCS2.transit['b'] = RCS3
+    RCS2.transit['c'] = RCS4
+    RCS3.transit['a'] = RCS3
+    RCS3.transit['b'] = RCS3
+    RCS3.transit['c'] = RCS3
+    RCS4.transit['a'] = RCS4
+    RCS4.transit['b'] = RCS4
+    RCS4.transit['c'] = RCS4
+    if Type == "pDFA":
+        RCS = pDFA('RCS', list('abc'), [RCS1, RCS2, RCS3, RCS4], RCS1, [RCS3])
+    else:
+        RCS = DFA('RCS', list('abc'), [RCS1, RCS2, RCS3, RCS4], RCS1, [RCS3])
+    if (SIZEOF):
+        EM_size["EM13"] = asizeof.asizeof(RCS)
+    return RCS
+
+def EM14(Type="DFA"):
+    """
+    The first three actions should be 'a' followed by 'b' followed by 'c'
+    """
+    RCT1, RCT2, RCT3, RCT4, RCT5 = state('RCT1'), state('RCT2'), state('RCT3'), state('RCT4'), state('RCT5')
+    RCT1.transit['a'] = RCT2
+    RCT1.transit['b'] = RCT5
+    RCT1.transit['c'] = RCT5
+    RCT2.transit['a'] = RCT5
+    RCT2.transit['b'] = RCT3
+    RCT2.transit['c'] = RCT5
+    RCT3.transit['a'] = RCT5
+    RCT3.transit['b'] = RCT5
+    RCT3.transit['c'] = RCT4
+    RCT4.transit['a'] = RCT4
+    RCT4.transit['b'] = RCT4
+    RCT4.transit['c'] = RCT4
+    RCT5.transit['a'] = RCT5
+    RCT5.transit['b'] = RCT5
+    RCT5.transit['c'] = RCT5
+    if Type == "pDFA":
+        RCT = pDFA('RCT', list('abc'), [RCT1, RCT2, RCT3, RCT4, RCT5], RCT1, [RCT4])
+    else:
+        RCT = DFA('RCT', list('abc'), [RCT1, RCT2, RCT3, RCT4, RCT5], RCT1, [RCT4])
+    if (SIZEOF):
+        EM_size["EM14"] = asizeof.asizeof(RCT)
+    return RCT
+
+def EM15(Type="DFA"):
+    """
+    Event 'a' followed by event 'b' must occur at least once
+    """
+    RCU1, RCU2, RCU3 = state('RCU1'), state('RCU2'), state('RCU3')
+    RCU1.transit['a'] = RCU2
+    RCU1.transit['b'] = RCU1
+    RCU1.transit['c'] = RCU1
+    RCU2.transit['a'] = RCU1
+    RCU2.transit['b'] = RCU3
+    RCU2.transit['c'] = RCU1
+    RCU3.transit['a'] = RCU3
+    RCU3.transit['b'] = RCU3
+    RCU3.transit['c'] = RCU3
+    if Type == "pDFA":
+        RCU = pDFA('RCU', list('abc'), [RCU1, RCU2, RCU3], RCU1, [RCU3])
+    else:
+        RCU = DFA('RCU', list('abc'), [RCU1, RCU2, RCU3], RCU1, [RCU3])
+    if (SIZEOF):
+        EM_size["EM15"] = asizeof.asizeof(RCU)
+    return RCU
