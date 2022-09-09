@@ -13,18 +13,20 @@ EM_size = dict()
 # Simplistic Cruise Control scenario 
 # Hexadecimal alphabet for 16 events
 
-sigma_cc    = list('F')
-sigma_ncc   = list('BCDE')
-sigma_e     = list('89A')
-sigma_1     = sigma_e + sigma_ncc + sigma_cc
-sigma_nccl  = list('B')
-sigma_ncch  = list('CD')
-sigma_B     = list('4567')
-sigma_A     = list('2')
-sigma_C     = list('1')
+sigma_cc    = list('5')
+sigma_ncc   = list('67AB')
+sigma_e     = list('CDEF')
+sigma_nccl  = list('7')
+sigma_ncch  = list('AB')
+sigma_AW    = list('6')
+sigma_B_A   = list('89')
+sigma_B_M   = list('23')
+sigma_A     = list('1')
+sigma_C     = list('4')
 sigma_idle  = list('0')
-sigma_B_e   = list('3')
-sigma_2     = sigma_idle + sigma_C + sigma_A + sigma_B_e + sigma_B
+sigma_1     = sigma_e + sigma_ncc + sigma_cc + sigma_B_A
+sigma_2     = sigma_idle + sigma_C + sigma_A + sigma_B_M
+sigma_B     = sigma_B_A + sigma_B_M
 sigma       = sigma_2 + sigma_1
 
 
@@ -43,6 +45,10 @@ def RE1e(Type="DFA"):
         CC02.transit[i] = CC01
     for i in sigma_ncc:
         CC00.transit[i] = CC02
+        CC01.transit[i] = CC02
+        CC02.transit[i] = CC02
+    for i in sigma_B_A:
+        CC00.transit[i] = CC00
         CC01.transit[i] = CC02
         CC02.transit[i] = CC02
     for i in sigma_e:
@@ -64,27 +70,21 @@ def RE1e(Type="DFA"):
 
 def RE2e(Type="DFA"):
     """
-    Every sequence of events for cruise control must include an event 
-    in sigma_cc followed by any sequences of events in sigma_A 
-    followed in the future by an event in sigma_B
+    If an event of sigma_AW occurs, then an event in sigma_B must 
+    eventually occur, until which cruise control is disengaged
     """
-    CC10, CC11, CC12, CC13 = state('CC10'), state('CC11'), state('CC12'), state('CC13')
+    CC10, CC11 = state('CC10'), state('CC11')
     for i in sigma:
         CC10.transit[i] = CC10
         CC11.transit[i] = CC11
-        CC12.transit[i] = CC12
-        CC13.transit[i] = CC13
-    for i in sigma_cc:
+    for i in sigma_AW:
         CC10.transit[i] = CC11
-    for i in sigma_A:
-        CC11.transit[i] = CC12
-        CC13.transit[i] = CC12
     for i in sigma_B:
-        CC12.transit[i] = CC13
+        CC11.transit[i] = CC10
     if Type == "pDFA":
-        CC1 = pDFA('CC1', sigma, [CC10, CC11, CC12, CC13], CC10, [CC13])
+        CC1 = pDFA('CC1', sigma, [CC10, CC11], CC10, [CC10])
     else:
-        CC1 = DFA('CC1', sigma, [CC10, CC11, CC12, CC13], CC10, [CC13])
+        CC1 = DFA('CC1', sigma, [CC10, CC11], CC10, [CC10])
     if (SIZEOF):
         EM_size["RE2e"] = asizeof.asizeof(CC1)
     return CC1
@@ -187,6 +187,8 @@ def CS2e(Type="DFA"):
         CC51.transit[i] = CC51
     for i in sigma_ncc:
         CC51.transit[i] = CC50
+    for i in sigma_B_A:
+        CC51.transit[i] = CC50
     for i in sigma_e:
         CC51.transit[i] = CC53
     for i in sigma_A:
@@ -211,15 +213,17 @@ def avg_tests(runs, test, string, test_name):
         test_Ptime += _time[0]
         test_Ctime += _time[1]
     print("Test %s (%s)\n------------------- " %(test_name, len(string)))
-    print("Computation time for Monolithic Enforcer : %f ms" %(test_Ptime/test_avg_runs))
-    print("Computation time for Compositional Enforcer : %f ms" %(test_Ctime/test_avg_runs))
-    print("Computation time for Compositional Enforcer (scaled down by # enforcers) : %f ms\n" %(test_Ctime/(6*test_avg_runs)))
+    print("Computation time for Monolithic Enforcer (MCT): %f ms" %(test_Ptime/test_avg_runs))
+    print("Computation time for Compositional Enforcer (PCT): %f ms" %(test_Ctime/test_avg_runs))
+    print("Computation time for Compositional Enforcer (scaled down by # enforcers) (PCT/#E): %f ms" %(test_Ctime/(6*test_avg_runs)))
+    print("Ratio R (PCT/#E/MCT) : %f ms\n" %((test_Ctime/(6*test_avg_runs))/(test_Ptime/test_avg_runs)))
 
 
 # Generating random strings from given alphabet
 
 def generate_strings(alphabet):
     strings = []
+    # strings.append("".join(random.choices(alphabet, k=5000)))
     ranges = [(10**i, 5*10**i) for i in range(1, 6)]
     for size1, size2 in ranges:
         strings.append("".join(random.choices(alphabet, k=size1)))
@@ -228,8 +232,8 @@ def generate_strings(alphabet):
 
 
 # Tests for compositions of RE1e, RE2e, S1e, S2e, CS1e and CS2e 
-# Monolithic Composition with 4*4*4*4*3*4 = 3072 states
-# Parallel Composition with 4+4+4+4+3+4 = 23 states
+# Monolithic Composition with 4*2*4*4*3*4 = 1536 states
+# Parallel Composition with 4+2+4+4+3+4 = 21 states
 
 def test(Input):
     # Monolithic Test
