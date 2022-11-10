@@ -89,11 +89,11 @@ For more examples, refer individual classes and functions along with the example
 Bibtex for citing the journal article:
 
 ```bibtex
-@inproceedings{cre_fmsd_2022,
-  title = {Compositional runtime enforcement revisited},
-  author = {Pinisetty, Srinivas and Pradhan, Ankit and Roop, Partha and Tripakis, Stavros},
+@article{cre_fmsd_2022,
+  title   = {Compositional runtime enforcement revisited},
+  author  = {Pinisetty, Srinivas and Pradhan, Ankit and Roop, Partha and Tripakis, Stavros},
   journal = {Formal Methods in System Design},
-  doi = {10.1007/s10703-022-00401-y},
-  year = {2022}
+  doi     = {10.1007/s10703-022-00401-y},
+  year    = {2022}
 }
 ```
